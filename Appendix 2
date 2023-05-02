@@ -1,0 +1,59 @@
+Maintenance-window-policy:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:SendCommand",
+                "ssm:CancelCommand",
+                "ssm:ListCommands",
+                "ssm:ListCommandInvocations",
+                "ssm:GetCommandInvocation",
+                "ssm:ListTagsForResource",
+                "ssm:GetParameters"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "resource-groups:ListGroups",
+                "resource-groups:ListGroupResources"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "tag:GetResources"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sns:Publish"
+            ],
+            "Resource": [
+                "arn:aws:sns:*:*:*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "iam:PassedToService": [
+                        "ssm.amazonaws.com"
+                    ]
+                }
+            }
+        }
+    ]
+}

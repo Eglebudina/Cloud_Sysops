@@ -1,0 +1,13 @@
+CloudFormation create-stack and create-change-set scripts can be executed from AWS CLI to launch/update the stack:
+
+aws cloudformation create-stack --stack-name waf-automation \
+--template-body file://../CFN-Templates/Waf.yml \
+--parameters file://../Params/eu-west-1/staging/WAFparams.json \
+--region eu-west-1 \
+
+aws cloudformation create-change-set --stack-name naEksWorkers1\
+--template-body file://../CFN-Templates/Waf.yml \
+--parameters file://../Params/eu-west-1/staging/WAFparams.json \
+--region eu-west-1 \ 
+--change-set-name scale-down-decommission \
+--capabilities CAPABILITY_IAM

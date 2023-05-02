@@ -1,0 +1,93 @@
+Vm_monitor.tf
+___________________________________________________________________________
+
+resource "datadog_monitor" "vm_memory_anomaly" {
+  name               = "Azure VM Usable Memory Anomaly"
+  type               = "query alert"
+  message            = "{{#is_alert}}\n\n Measure of Availability of Virtual machines over time. Note: This metric is previewed to only a small set of customers at the moment, as we prioritize improving data quality and consistency. As we improve our data standard, we will be rolling out this feature fleetwide in a phased manner. {{region.name}}  {{subscription.name}} {{name}}\n\n{{/is_alert}} @opsgenie-datadog-aptiv-project"
+  escalation_message = "Please investigate available memory anomaly"
+
+  query = "avg(last_15m):anomalies(avg:azure.vm.vm_availability_metric_preview{environment:prod} by {region,subscription_name,resource_group,name}, 'agile', 2, direction='both', interval=60, alert_window='last_15m', count_default_zero='true') >= 1"
+
+  monitor_thresholds {
+    critical = 1
+  }
+
+  notify_no_data = false
+  renotify_interval = 0
+	evaluation_delay = 300
+	new_group_delay = 60
+
+  tags = ["P2", "app:azure", "vm"]
+}
+
+Network_Monitors.tf
+___________________________________________________________________________
+
+resource "datadog_monitor" "checks_failed_percent" {
+  name               = "Azure network watchers monitor checks_failed_percent"
+  type               = "query alert"
+  message            = "{{#is_alert}}\n\n Azure network watchers monitor checks_failed_percent {{region.name}}  {{subscription.name}} \n\n{{/is_alert}} @opsgenie-datadog-aptiv-project "
+  
+  query = "avg(last_15m):avg:azure.network_networkwatchers_connectionmonitors.checks_failed_percent{*} by {protocol,destinationaddress,destinationname,destinationresourceid,destinationtype,destinationport,testgroupname,testconfigurationname,region,sourceip,destinationip,sourcesubnet,destinationsubnet,sourcetype,sourceresourceid,sourcename,sourceaddress} != 100"
+  
+  include_tags = true
+  evaluation_delay = 300
+  new_group_delay = 60
+  notify_no_data = false
+  renotify_interval = 0
+  require_full_window = false
+  monitor_thresholds {
+    critical= 100
+    }
+
+  tags = ["P2", "app:azure", "network"]
+}
+SQL_monitors.tf
+___________________________________________________________________________
+
+resource "datadog_monitor" "sql_cpu_percentage" {
+  name               = "Azure SQL CPU percentage is high"
+  type               = "query alert"
+  message            = "{{#is_alert}}\n\nSQL CPU utilization is high for {{region.name}}  {{subscription.name}} \n\n{{/is_alert}} @opsgenie-datadog-aptiv-project  "
+  
+  query = "min(last_15m):avg:azure.sql_servers_databases.cpu_percent{environment:prod} by {region,subscription_name,resource_group,server_name} > 90"
+  
+  evaluation_delay = 900
+  include_tags = true
+  new_host_delay = 300
+  no_data_timeframe = null
+  notify_no_data = false
+  renotify_interval = 0
+  require_full_window = false
+  monitor_thresholds {
+    critical= 90.0
+    critical_recovery= 81.0
+    warning= 80.0 
+    warning_recovery= 75.0
+    }
+
+  tags = ["P1", "app:azure", "sql"]
+}
+
+
+App_monitors.tf
+___________________________________________________________________________
+
+resource "datadog_monitor" "app_service_http_500" {
+  name               = "Azure HTTP 500 Error Rate is abnormal"
+  type               = "query alert"
+  message            = "{{#is_alert}}\n\n HTTP 500 Error Rate is abnormal on instance {{region.name}}  {{subscription.name}} \n\n{{/is_alert}} @opsgenie-datadog-aptiv-project "
+  query = "sum(last_15m):sum:azure.app_services.http5xx{environment:prod} by {region,resource_group,subscription_name}.as_count() > 4"
+  
+  include_tags = true
+  new_group_delay = 60
+  notify_no_data = false
+  renotify_interval = 0
+  require_full_window = false
+  monitor_thresholds {
+    critical= 4
+    }
+
+  tags = ["P2", "app:azure", "app_service"]
+}

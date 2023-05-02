@@ -1,0 +1,50 @@
+Role and Policy for S3 Batch Operations(JSON):
+{
+    "Sid": "AddIamPermissions",
+    "Effect": "Allow",
+    "Action": [
+       "iam:GetRole",
+       "iam:PassRole" ],
+       "Resource": 	"arn:aws:iam::{ACCOUNT-ID}:role/{IAM_ROLE_NAME}"
+  }
+I am not showing clients bucket details below for data privacy reasons. “Resource” parameters for the buckets will need to change in order for the policy to take effect.
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CopyObjectsToEncrypt",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectTagging",
+        "s3:PutObjectAcl",
+        "s3:PutObjectVersionTagging",
+        "s3:PutObjectVersionAcl",
+        "s3:GetObject",
+        "s3:GetObjectAcl",
+        "s3:GetObjectTagging",
+        "s3:GetObjectVersion",
+        "s3:GetObjectVersionAcl",
+        "s3:GetObjectVersionTagging"
+      ],
+      "Resource": "arn:aws:s3:::{source_and_destination_bucket for copy}/*"
+    },
+    {
+      "Sid": "ReadManifest",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": "arn:aws:s3:::{manifest_key}"
+    },
+    {
+      "Sid": "WriteReport",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::{reportbucket}/*"
+    }
+  ]
+}
